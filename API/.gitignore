@@ -4,5 +4,6 @@
 **/DotNetAgent
 /wwwroot
 .idea
-obj/*bin/*
+obj/*
+bin/*
 .idea/
