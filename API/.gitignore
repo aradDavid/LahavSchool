@@ -4,3 +4,4 @@
 **/DotNetAgent
 /wwwroot
 .idea
+obj/*bin/*
