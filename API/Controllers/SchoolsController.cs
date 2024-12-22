@@ -98,7 +98,7 @@ public class SchoolsController : ControllerBase
             var currentSchool = await m_DbContext.Schools.FindAsync(i_schoolId);
             if (currentSchool != null)
             {
-                if (i_SchoolUpdateDto.Name != string.Empty )
+                if (i_SchoolUpdateDto.Name != null )
                 {
                     currentSchool.Name = i_SchoolUpdateDto.Name;
                 }
