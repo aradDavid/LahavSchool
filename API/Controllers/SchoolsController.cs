@@ -12,7 +12,7 @@ namespace API.Controllers;
 public class SchoolsController : ControllerBase
 {
     private readonly myDbContext _dbContext;
-    private readonly Validations _schoolValidations;
+    private  Validations _schoolValidations;
     
     public SchoolsController(myDbContext dbContext) 
     {
@@ -39,7 +39,7 @@ public class SchoolsController : ControllerBase
         List<School> activeSchools = new List<School>();
         foreach (var school in schools)
         {
-            if (school.ExpiresAt == null)
+            if (_schoolValidations.CheckIdValidations(school).IsValid)
             {
                 activeSchools.Add(school);
             }
@@ -61,6 +61,11 @@ public class SchoolsController : ControllerBase
     {
         var school = await _dbContext.Schools.FirstOrDefaultAsync(school => school.Name == schoolName,cancellationToken);
         ValidationDisplay validationTest = _schoolValidations.CheckSchoolNameValidations(school);
+        if (validationTest.IsValid)
+        {
+            validationTest = _schoolValidations.CheckIdValidations(school);
+        }
+        
         return validationTest.IsValid ? Ok(school) : BadRequest(validationTest);
     }
 
@@ -73,10 +78,15 @@ public class SchoolsController : ControllerBase
         {
             if (school.DistrictId == districtId)
             {
-                allSchoolsFromDistrict.Add(school);
+                ValidationDisplay validationTest = _schoolValidations.CheckIdValidations(school);
+                if (validationTest.IsValid)
+                {
+                    allSchoolsFromDistrict.Add(school);
+                }
+               
             }
         }
-        return schools.Count > 0 ? Ok(allSchoolsFromDistrict) : BadRequest("There are no schools in this district!");
+        return allSchoolsFromDistrict.Count > 0 ? Ok(allSchoolsFromDistrict) : BadRequest("There are no schools in this district!");
     }
 
     [HttpPost("addSchool")]

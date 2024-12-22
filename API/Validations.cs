@@ -13,8 +13,17 @@ public class Validations
         };
 
     }
+
+    private void resetValidationDisplay()
+    {
+        ValidationDisplayObj = new ValidationDisplay()
+        {
+            IsValid = true
+        };
+    }
     public ValidationDisplay CheckIdValidations(School? currSchool)
     {
+        resetValidationDisplay();
         if (currSchool == null)
         { 
             ValidationDisplayObj = new ValidationDisplay()
@@ -40,6 +49,7 @@ public class Validations
 
     public ValidationDisplay CheckSchoolNameValidations(School? currSchool)
     {
+        resetValidationDisplay();
         if (currSchool == null)
         {
             ValidationDisplayObj = new ValidationDisplay()
@@ -56,6 +66,7 @@ public class Validations
     
     public List<ValidationDisplay>? CheckNewSchool(School currSchool)
     {
+        resetValidationDisplay();
         List<ValidationDisplay> validations = new List<ValidationDisplay>();
         if (currSchool.DistrictId <=0)
         {
@@ -81,6 +92,7 @@ public class Validations
 
     public ValidationDisplay CheckDeletedSchool(School? currSchool)
     {
+        resetValidationDisplay();
         if (currSchool == null)
         {
             ValidationDisplayObj = new ValidationDisplay()
@@ -105,6 +117,7 @@ public class Validations
 
     public List<ValidationDisplay> CheckUpdatedSchool(School? currSchool)
     {
+        resetValidationDisplay();
         List<ValidationDisplay> validations = new List<ValidationDisplay>();
         if (currSchool == null)
         {
