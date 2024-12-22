@@ -19,20 +19,41 @@ public class SchoolsController : ControllerBase
         _dbContext = dbContext;
         _validations = new Validations();
     }
+
+    private async Task<List<School>> getAllSchools(CancellationToken cancellationToken=default)
+    {
+        var schools =  await _dbContext.Schools.ToListAsync(cancellationToken);
+        return schools;
+    }
+
+    private async Task<School> getSchoolById(int id)
+    {
+        var school = await _dbContext.Schools.FirstOrDefaultAsync(x => x.Id == id);
+        return school;
+    }
     
     [HttpGet]
-    public async Task<ActionResult<string>> GetSchools(CancellationToken cancellationToken=default)
+    public async Task<ActionResult<string>> GetSchools()
     {
-        var schools = await _dbContext.Schools.ToListAsync(cancellationToken);
-        return Ok(schools);
+        var schools = await getAllSchools();
+        List<School> activeSchools = new List<School>();
+        foreach (var school in schools)
+        {
+            if (school.ExpiresAt == null)
+            {
+                activeSchools.Add(school);
+            }
+        }
+        
+        return Ok(activeSchools);
     }
     
     [HttpGet("{id}")]
     public async Task<ActionResult<School>> GetSchoolFromId(int id,CancellationToken cancellationToken=default)
     {
-        var school = await _dbContext.Schools.FindAsync(id,cancellationToken);
+        var school = await getSchoolById(id);
         ValidationDisplay validationTest = _validations.CheckIdValidations(school);
-        return validationTest.IsValid  ? Ok("School has been added!") : BadRequest(validationTest);
+        return validationTest.IsValid  ? Ok(school) : BadRequest(validationTest);
     }
 
     [HttpGet("name/{schoolName}")]
@@ -43,14 +64,14 @@ public class SchoolsController : ControllerBase
         return validationTest.IsValid ? Ok(school) : BadRequest(validationTest);
     }
 
-    [HttpGet("district/{districtName}")]
-    public async Task<ActionResult<List<School>>> GetSchoolsFromDistrict(int districtName,CancellationToken cancellationToken=default)
+    [HttpGet("district/{districtId}")]
+    public async Task<ActionResult<List<School>>> GetSchoolsFromDistrict(int districtId,CancellationToken cancellationToken=default)
     {
-        var schools = await _dbContext.Schools.ToListAsync(cancellationToken);
+        var schools = await getAllSchools();
         List<School> allSchoolsFromDistrict = new List<School>();
         foreach (var school in schools)
         {
-            if (school.DistrictId == districtName)
+            if (school.DistrictId == districtId)
             {
                 allSchoolsFromDistrict.Add(school);
             }
@@ -88,7 +109,7 @@ public class SchoolsController : ControllerBase
     public async Task<ActionResult<string>> DeleteSchool(int schoolId,CancellationToken cancellationToken=default)
     {
         ActionResult<string> result;
-        var deletedSchool = await _dbContext.Schools.FindAsync(schoolId);
+        var deletedSchool = await getSchoolById(schoolId);
         ValidationDisplay validTest = _validations.CheckDeletedSchool(deletedSchool);
         if (validTest.IsValid)
         {
@@ -108,8 +129,8 @@ public class SchoolsController : ControllerBase
         public async Task<ActionResult<string>> UpdateSchool([FromQuery]SchoolUpdateDto schoolUpdateDto,int schoolId,CancellationToken cancellationToken=default)
         {
             ActionResult<string> result = BadRequest("There is no school with that id!");
-            var currentSchool = await _dbContext.Schools.FindAsync(schoolId,cancellationToken);
-            List<ValidationDisplay> validationsTest = _validations.CheckNewSchool(currentSchool);
+            var currentSchool = await getSchoolById(schoolId);
+            List<ValidationDisplay> validationsTest = _validations.CheckUpdatedSchool(currentSchool);
             if (validationsTest.Count == 0)
             {
                 if (schoolUpdateDto.Name != null )
@@ -117,12 +138,12 @@ public class SchoolsController : ControllerBase
                     currentSchool.Name = schoolUpdateDto.Name;
                 }
     
-                if (schoolUpdateDto.DistrictId >=0)
+                if (schoolUpdateDto.DistrictId >= 0)
                 {
                     currentSchool.DistrictId = schoolUpdateDto.DistrictId;
                 }
     
-                if (schoolUpdateDto.LicenseId >=0)
+                if (schoolUpdateDto.LicenseId >= 0)
                 {
                     currentSchool.LicenseId = schoolUpdateDto.LicenseId;
                 }
