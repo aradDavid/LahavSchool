@@ -11,42 +11,46 @@ namespace API.Controllers;
 [Route("/[controller]")]
 public class SchoolsController : ControllerBase
 {
-    private readonly myDbContext m_DbContext;
+    private readonly myDbContext _dbContext;
+    private readonly Validations _validations;
     
-    public SchoolsController(myDbContext i_DbContext) 
+    public SchoolsController(myDbContext dbContext) 
     {
-        m_DbContext = i_DbContext;
+        _dbContext = dbContext;
+        _validations = new Validations();
     }
     
     [HttpGet]
-    public async Task<ActionResult<string>> GetSchools()
+    public async Task<ActionResult<string>> GetSchools(CancellationToken cancellationToken=default)
     {
-        var schools = await m_DbContext.Schools.ToListAsync();
+        var schools = await _dbContext.Schools.ToListAsync(cancellationToken);
         return Ok(schools);
     }
     
-    [HttpGet("{i_id}")]
-    public async Task<ActionResult<School>> GetSchoolFromId(int i_id)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<School>> GetSchoolFromId(int id,CancellationToken cancellationToken=default)
     {
-        var school = await m_DbContext.Schools.FindAsync(i_id);
-        return school != null ? Ok(school) : BadRequest("There is no schools with this id!");
+        var school = await _dbContext.Schools.FindAsync(id,cancellationToken);
+        ValidationDisplay validationTest = _validations.CheckIdValidations(school);
+        return validationTest.IsValid  ? Ok("School has been added!") : BadRequest(validationTest);
     }
 
-    [HttpGet("name/{i_SchoolName}")]
-    public async Task<ActionResult<School>> GetSchoolFromName(string i_SchoolName)
+    [HttpGet("name/{schoolName}")]
+    public async Task<ActionResult<School>> GetSchoolFromName(string schoolName,CancellationToken cancellationToken=default)
     {
-        var school = await m_DbContext.Schools.FirstOrDefaultAsync(school => school.Name == i_SchoolName);
-        return school != null ? Ok(school) : BadRequest("There is no school with name!");
+        var school = await _dbContext.Schools.FirstOrDefaultAsync(school => school.Name == schoolName,cancellationToken);
+        ValidationDisplay validationTest = _validations.CheckSchoolNameValidations(school);
+        return validationTest.IsValid ? Ok(school) : BadRequest(validationTest);
     }
 
-    [HttpGet("district/{i_DistrictName}")]
-    public async Task<ActionResult<List<School>>> GetSchoolsFromDistrict(int i_DistrictName)
+    [HttpGet("district/{districtName}")]
+    public async Task<ActionResult<List<School>>> GetSchoolsFromDistrict(int districtName,CancellationToken cancellationToken=default)
     {
-        var schools = await m_DbContext.Schools.ToListAsync();
+        var schools = await _dbContext.Schools.ToListAsync(cancellationToken);
         List<School> allSchoolsFromDistrict = new List<School>();
         foreach (var school in schools)
         {
-            if (school.DistrictId == i_DistrictName)
+            if (school.DistrictId == districtName)
             {
                 allSchoolsFromDistrict.Add(school);
             }
@@ -55,73 +59,87 @@ public class SchoolsController : ControllerBase
     }
 
     [HttpPost("addSchool")]
-    public async Task<ActionResult<string>> AddSchool([FromQuery]SchoolDto i_SchoolDto)
-    {
-        School newSchool = new School()
-        {
-            Name = i_SchoolDto.Name,
-            DistrictId = i_SchoolDto.DistrictId,
-            LicenseId = i_SchoolDto.LicenseId,
-            CreatedAt = DateTime.Now.ToString(),
-            UpdatedAt = DateTime.Now.ToString(),
-            ExpiresAt = DateTime.Now.AddYears(1).ToString()
-            
-        };
-        m_DbContext.Schools.Add(newSchool);
-        await m_DbContext.SaveChangesAsync();
-        return Ok("School added successfully!");
-    }
-    
-    [HttpGet("deleteSchool/{i_schoolId}")]
-    public async Task<ActionResult<string>> DeleteSchool(int i_schoolId)
+    public async Task<ActionResult<string>> AddSchool([FromQuery]SchoolDto schoolDto,CancellationToken cancellationToken=default)
     {
         ActionResult<string> result;
-        var deletedSchool = await m_DbContext.Schools.FindAsync(i_schoolId);
-        if (deletedSchool != null)
+        School newSchool = new School()
         {
-            m_DbContext.Schools.Remove(deletedSchool);
-            await m_DbContext.SaveChangesAsync();
+            Name = schoolDto.Name,
+            DistrictId = schoolDto.DistrictId,
+            LicenseId = schoolDto.LicenseId,
+            CreatedAt = DateTime.Now.ToString(),
+        };
+        List<ValidationDisplay> validationTest = _validations.CheckNewSchool(newSchool);
+        if (validationTest == null)
+        {
+            _dbContext.Schools.Add(newSchool);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            result = Ok("School has been added!");
+        }
+        else
+        {
+            result = BadRequest(validationTest);
+        }
+
+        return result;
+    }
+    
+    [HttpGet("deleteSchool/{schoolId}")]
+    public async Task<ActionResult<string>> DeleteSchool(int schoolId,CancellationToken cancellationToken=default)
+    {
+        ActionResult<string> result;
+        var deletedSchool = await _dbContext.Schools.FindAsync(schoolId);
+        ValidationDisplay validTest = _validations.CheckDeletedSchool(deletedSchool);
+        if (validTest.IsValid)
+        {
+            deletedSchool.ExpiresAt = DateTime.Now.ToString();
+            await _dbContext.SaveChangesAsync(cancellationToken);
             result = Ok($"{deletedSchool.Name} has been deleted!");
         }
         else
         {
-            result = BadRequest("There is no school with that id!");
+            result = BadRequest(validTest);
         }
 
         return result;
     }
 
-    [HttpPost("updateSchool/{i_schoolId}")]
-        public async Task<ActionResult<string>> UpdateSchool([FromQuery]SchoolUpdateDto i_SchoolUpdateDto,int i_schoolId)
+    [HttpPost("updateSchool/{schoolId}")]
+        public async Task<ActionResult<string>> UpdateSchool([FromQuery]SchoolUpdateDto schoolUpdateDto,int schoolId,CancellationToken cancellationToken=default)
         {
             ActionResult<string> result = BadRequest("There is no school with that id!");
-            var currentSchool = await m_DbContext.Schools.FindAsync(i_schoolId);
-            if (currentSchool != null)
+            var currentSchool = await _dbContext.Schools.FindAsync(schoolId,cancellationToken);
+            List<ValidationDisplay> validationsTest = _validations.CheckNewSchool(currentSchool);
+            if (validationsTest.Count == 0)
             {
-                if (i_SchoolUpdateDto.Name != null )
+                if (schoolUpdateDto.Name != null )
                 {
-                    currentSchool.Name = i_SchoolUpdateDto.Name;
+                    currentSchool.Name = schoolUpdateDto.Name;
                 }
     
-                if (i_SchoolUpdateDto.DistrictId >=0)
+                if (schoolUpdateDto.DistrictId >=0)
                 {
-                    currentSchool.DistrictId = i_SchoolUpdateDto.DistrictId;
+                    currentSchool.DistrictId = schoolUpdateDto.DistrictId;
                 }
     
-                if (i_SchoolUpdateDto.LicenseId >=0)
+                if (schoolUpdateDto.LicenseId >=0)
                 {
-                    currentSchool.LicenseId = i_SchoolUpdateDto.LicenseId;
+                    currentSchool.LicenseId = schoolUpdateDto.LicenseId;
                 }
     
-                if (i_SchoolUpdateDto.ExpiredAt != string.Empty)
+                if (schoolUpdateDto.ExpiredAt != string.Empty)
                 {
-                    currentSchool.ExpiresAt = i_SchoolUpdateDto.ExpiredAt;
+                    currentSchool.ExpiresAt = schoolUpdateDto.ExpiredAt;
                 }
                 
                 currentSchool.UpdatedAt = DateTime.Now.ToString();
-                m_DbContext.Schools.Update(currentSchool);
-                await m_DbContext.SaveChangesAsync();
+                _dbContext.Schools.Update(currentSchool);
+                await _dbContext.SaveChangesAsync(cancellationToken);
                 result = Ok($"{currentSchool.Name} has been updated!");
+            }
+            else
+            {
+                result = BadRequest(validationsTest);
             }
     
             return result;
