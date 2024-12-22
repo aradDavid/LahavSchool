@@ -5,3 +5,4 @@
 /wwwroot
 .idea
 obj/*bin/*
+.idea/
