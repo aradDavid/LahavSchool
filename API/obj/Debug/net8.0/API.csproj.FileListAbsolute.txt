@@ -1,6 +1,5 @@
 /Users/araddavid/Desktop/SchoolProject/API/bin/Debug/net8.0/appsettings.Development.json
 /Users/araddavid/Desktop/SchoolProject/API/bin/Debug/net8.0/appsettings.json
-/Users/araddavid/Desktop/SchoolProject/API/bin/Debug/net8.0/schools.json
 /Users/araddavid/Desktop/SchoolProject/API/bin/Debug/net8.0/API
 /Users/araddavid/Desktop/SchoolProject/API/bin/Debug/net8.0/API.deps.json
 /Users/araddavid/Desktop/SchoolProject/API/bin/Debug/net8.0/API.runtimeconfig.json
