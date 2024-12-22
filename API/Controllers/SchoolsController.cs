@@ -12,12 +12,12 @@ namespace API.Controllers;
 public class SchoolsController : ControllerBase
 {
     private readonly myDbContext _dbContext;
-    private readonly Validations _validations;
+    private readonly Validations _schoolValidations;
     
     public SchoolsController(myDbContext dbContext) 
     {
         _dbContext = dbContext;
-        _validations = new Validations();
+        _schoolValidations = new Validations();
     }
 
     private async Task<List<School>> getAllSchools(CancellationToken cancellationToken=default)
@@ -52,7 +52,7 @@ public class SchoolsController : ControllerBase
     public async Task<ActionResult<School>> GetSchoolFromId(int id,CancellationToken cancellationToken=default)
     {
         var school = await getSchoolById(id);
-        ValidationDisplay validationTest = _validations.CheckIdValidations(school);
+        ValidationDisplay validationTest = _schoolValidations.CheckIdValidations(school);
         return validationTest.IsValid  ? Ok(school) : BadRequest(validationTest);
     }
 
@@ -60,7 +60,7 @@ public class SchoolsController : ControllerBase
     public async Task<ActionResult<School>> GetSchoolFromName(string schoolName,CancellationToken cancellationToken=default)
     {
         var school = await _dbContext.Schools.FirstOrDefaultAsync(school => school.Name == schoolName,cancellationToken);
-        ValidationDisplay validationTest = _validations.CheckSchoolNameValidations(school);
+        ValidationDisplay validationTest = _schoolValidations.CheckSchoolNameValidations(school);
         return validationTest.IsValid ? Ok(school) : BadRequest(validationTest);
     }
 
@@ -90,7 +90,7 @@ public class SchoolsController : ControllerBase
             LicenseId = schoolDto.LicenseId,
             CreatedAt = DateTime.Now.ToString(),
         };
-        List<ValidationDisplay> validationTest = _validations.CheckNewSchool(newSchool);
+        List<ValidationDisplay> validationTest = _schoolValidations.CheckNewSchool(newSchool);
         if (validationTest == null)
         {
             _dbContext.Schools.Add(newSchool);
@@ -110,7 +110,7 @@ public class SchoolsController : ControllerBase
     {
         ActionResult<string> result;
         var deletedSchool = await getSchoolById(schoolId);
-        ValidationDisplay validTest = _validations.CheckDeletedSchool(deletedSchool);
+        ValidationDisplay validTest = _schoolValidations.CheckDeletedSchool(deletedSchool);
         if (validTest.IsValid)
         {
             deletedSchool.ExpiresAt = DateTime.Now.ToString();
@@ -130,7 +130,7 @@ public class SchoolsController : ControllerBase
         {
             ActionResult<string> result = BadRequest("There is no school with that id!");
             var currentSchool = await getSchoolById(schoolId);
-            List<ValidationDisplay> validationsTest = _validations.CheckUpdatedSchool(currentSchool);
+            List<ValidationDisplay> validationsTest = _schoolValidations.CheckUpdatedSchool(currentSchool);
             if (validationsTest.Count == 0)
             {
                 if (schoolUpdateDto.Name != null )
