@@ -21,11 +21,15 @@ public class WorkerSubServices : WorkerBase
     private async Task getSchools(string taskId)
     {
         var allSchools = await _dbContext.Schools.ToListAsync();
+        List<School> activeSchools = new List<School>();
         foreach (var school in allSchools)
         {
-            Console.WriteLine(school.Name);
+            if (school.ExpiresAt == null)
+            {
+                activeSchools.Add(school);
+            }
         }
-        var allSchoolsAsJson = JsonSerializer.Serialize(allSchools);
+        var allSchoolsAsJson = JsonSerializer.Serialize(activeSchools);
         Console.WriteLine($"Pushing the result with id:{taskId}");
         Console.WriteLine(allSchoolsAsJson);
         await _db.StringSetAsync(taskId, allSchoolsAsJson);
