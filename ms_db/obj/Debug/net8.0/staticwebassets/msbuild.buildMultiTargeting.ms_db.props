@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/ms_db.props" />
+</Project>

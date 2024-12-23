@@ -1,4 +1,4 @@
-using API.Models;
+using CommonClasses.Models;
 namespace API;
 
 public class Validations
