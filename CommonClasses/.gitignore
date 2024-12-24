@@ -1,0 +1,9 @@
+.DS_Store
+**/obj
+**/bin
+**/DotNetAgent
+/wwwroot
+.idea
+obj/*
+bin/*
+.idea/ 

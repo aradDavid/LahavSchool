@@ -1,7 +1,7 @@
-using API.Models;
+using CommonClasses.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Data;
+namespace CommonClasses.Data;
 
 public class myDbContext : DbContext
 {

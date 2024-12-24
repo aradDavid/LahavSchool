@@ -5,6 +5,10 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{61A0D9C5-014B-4D5D-9B25-48E3100C8CC6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ms_db", "ms_db\ms_db.csproj", "{ECD84A34-F878-4CB7-A471-F1C49965E2A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonClasses", "CommonClasses\CommonClasses.csproj", "{6C8B5771-E0BA-4766-BEDE-368271A52B20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{61A0D9C5-014B-4D5D-9B25-48E3100C8CC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61A0D9C5-014B-4D5D-9B25-48E3100C8CC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61A0D9C5-014B-4D5D-9B25-48E3100C8CC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECD84A34-F878-4CB7-A471-F1C49965E2A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECD84A34-F878-4CB7-A471-F1C49965E2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECD84A34-F878-4CB7-A471-F1C49965E2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECD84A34-F878-4CB7-A471-F1C49965E2A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C8B5771-E0BA-4766-BEDE-368271A52B20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C8B5771-E0BA-4766-BEDE-368271A52B20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C8B5771-E0BA-4766-BEDE-368271A52B20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C8B5771-E0BA-4766-BEDE-368271A52B20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

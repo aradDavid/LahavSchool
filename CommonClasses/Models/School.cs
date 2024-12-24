@@ -1,6 +1,5 @@
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace API.Models;
+namespace CommonClasses.Models;
 
 
 public class School
