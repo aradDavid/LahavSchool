@@ -11,4 +11,7 @@ public class TaskRedis
     public School? SchoolData { get; set; }
     public SchoolUpdateDto? SchoolUpdateData { get; set; }
     public int SchoolId { get; set; }
+    public int DistrictId { get; set; }
+    public string? SchoolName { get; set; }
+    
 }

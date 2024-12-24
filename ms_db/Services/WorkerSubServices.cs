@@ -1,4 +1,4 @@
-using System.Reflection;
+using System.Linq;
 using System.Text.Json;
 using API.DTOs;
 using CommonClasses.Data;
@@ -12,24 +12,18 @@ namespace ms_db.Services;
 public class WorkerSubServices : WorkerBase
 {
     private readonly myDbContext _dbContext;
+    private readonly Validations _validations;
 
     public WorkerSubServices(myDbContext dbContext)
     {
         _dbContext = dbContext;
+        _validations = new Validations();
     }
 
     private async Task getSchools(string taskId)
     {
-        var allSchools = await _dbContext.Schools.ToListAsync();
-        List<School> activeSchools = new List<School>();
-        foreach (var school in allSchools)
-        {
-            if (school.ExpiresAt == null)
-            {
-                activeSchools.Add(school);
-            }
-        }
-        var allSchoolsAsJson = JsonSerializer.Serialize(activeSchools);
+        var allSchools = from s in _dbContext.Schools where s.ExpiresAt == null select s;
+        var allSchoolsAsJson = JsonSerializer.Serialize(allSchools);
         Console.WriteLine($"Pushing the result with id:{taskId}");
         Console.WriteLine(allSchoolsAsJson);
         await _db.StringSetAsync(taskId, allSchoolsAsJson);
@@ -39,9 +33,11 @@ public class WorkerSubServices : WorkerBase
 
     private async Task getSchoolById(string taskId,int schoolId)
     {
+        var currSchoolTest = from s in _dbContext.Schools
+            where s.Id == schoolId && s.ExpiresAt==null 
+            select s;
         var currSchool = await _dbContext.Schools.FindAsync(schoolId);
-        
-        var currSchoolAsJson = JsonSerializer.Serialize(currSchool);
+        var currSchoolAsJson = JsonSerializer.Serialize(currSchoolTest);
         Console.WriteLine("Found it :"+currSchoolAsJson);
         await _db.StringSetAsync(taskId, currSchoolAsJson);
         string statusKey = "status" + taskId;
@@ -50,67 +46,88 @@ public class WorkerSubServices : WorkerBase
     
     private async Task getSchoolByName(string taskId,string schoolName)
     {
-        var currSchool = await _dbContext.Schools.FindAsync(schoolName);
-        var currSchoolAsJson = JsonSerializer.Serialize(currSchool);
+        var schoolNameQuery = from s in _dbContext.Schools
+            where s.Name == schoolName && s.ExpiresAt == null 
+            select s;
+        var currSchoolAsJson = JsonSerializer.Serialize(schoolNameQuery);
         Console.WriteLine("Found it :"+currSchoolAsJson);
         await _db.StringSetAsync(taskId, currSchoolAsJson);
         string statusKey = "status" + taskId;
         await _db.StringSetAsync(statusKey, "Done");
     }
-
+    private async Task getSchoolByDistrict(string taskId, int districtId)
+    {
+        var districtQuery = from s in _dbContext.Schools
+            where s.DistrictId == districtId && s.ExpiresAt== null
+            select s;
+        var currSchoolsAsJson = JsonSerializer.Serialize(districtQuery);
+        Console.WriteLine("Found it :"+currSchoolsAsJson);
+        await _db.StringSetAsync(taskId, currSchoolsAsJson);
+        string statusKey = "status" + taskId;
+        await _db.StringSetAsync(statusKey, "Done");
+    }
     private async Task addNewSchool(string taskId,School newSchool)
     {
-        /*
-        PropertyInfo[] props = newSchool.GetType().GetProperties();
-        foreach (var type  in props )
-        {
-            Console.WriteLine(type.PropertyType.Name);
-            Console.WriteLine(type.GetValue(newSchool));
-        }*/
         _dbContext.Schools.Add(newSchool);
         await _dbContext.SaveChangesAsync();
         string statusKey = "status" + taskId;
         await _db.StringSetAsync(statusKey, "Done");
     }
-
     private async Task deleteSchool(string taskId,int schoolId)
     {
-        var deletedSchool = await _dbContext.Schools.FindAsync(schoolId);
-        deletedSchool.ExpiresAt = DateTime.Now.ToString();
-        await _dbContext.SaveChangesAsync();
         string statusKey = "status" + taskId;
-        await _db.StringSetAsync(statusKey, "Done");
+        var deletedSchool = await _dbContext.Schools.FindAsync(schoolId);
+        if (deletedSchool != null && deletedSchool.ExpiresAt == null)
+        {
+            deletedSchool.ExpiresAt = DateTime.Now.ToString();
+            await _dbContext.SaveChangesAsync();
+            await _db.StringSetAsync(statusKey, "Done");
+        }
+        else
+        {
+            await _db.StringSetAsync(statusKey,"Doesnt-Exist");
+        }
+       
     }
 
     private async Task UpdateSchool(string taskId, int schooldId,SchoolUpdateDto updatedSchoolDto)
     {
-        var updatedSchool = await _dbContext.Schools.FindAsync(schooldId);
-        
-        if (updatedSchoolDto.Name != null )
-        {
-            updatedSchool.Name = updatedSchoolDto.Name;
-        }
-    
-        if (updatedSchoolDto.DistrictId >= 0)
-        {
-            updatedSchool.DistrictId = updatedSchoolDto.DistrictId;
-        }
-    
-        if (updatedSchoolDto.LicenseId >= 0)
-        {
-            updatedSchool.LicenseId = updatedSchoolDto.LicenseId;
-        }
-    
-        if (updatedSchoolDto.ExpiredAt != string.Empty)
-        {
-            updatedSchool.ExpiresAt = updatedSchoolDto.ExpiredAt;
-        }
-                
-        updatedSchool.UpdatedAt = DateTime.Now.ToString();
-        _dbContext.Schools.Update(updatedSchool);
-        await _dbContext.SaveChangesAsync();
         string statusKey = "status" + taskId;
-        await _db.StringSetAsync(statusKey, "Done");
+        var updatedSchool = await _dbContext.Schools.FindAsync(schooldId);
+        if (updatedSchool != null && updatedSchoolDto.ExpiredAt == null)
+        {
+            if (!_validations.CheckIfFieldIsEmpty(updatedSchoolDto.DistrictId))
+            {
+                updatedSchool.DistrictId = updatedSchoolDto.DistrictId;
+            }
+
+            if (!_validations.CheckIfFieldIsEmpty(updatedSchoolDto.LicenseId))
+            {
+                updatedSchool.LicenseId = updatedSchoolDto.LicenseId;
+            }
+
+            if (!_validations.CheckIfFieldIsEmpty(updatedSchoolDto.Name))
+            {
+                updatedSchool.Name = updatedSchoolDto.Name;
+            }
+            updatedSchool.UpdatedAt = DateTime.Now.ToString();
+            _dbContext.Schools.Update(updatedSchool);
+            await _dbContext.SaveChangesAsync();
+            await _db.StringSetAsync(statusKey, "Done");
+        }
+        else
+        {
+            await _db.StringSetAsync(statusKey, "Doesnt-Exist");
+        }
+        
+    
+        
+                
+       
+       
+       
+       
+        
     }
     
     
@@ -124,8 +141,7 @@ public class WorkerSubServices : WorkerBase
             {
                 var taskData = JsonSerializer.Deserialize<TaskRedis>(taskJson);
                 var taskId = taskData.TaskId;
-                TaskType taskAction = taskData.TaskName;
-                switch (taskAction)
+                switch (taskData.TaskName)
                 {
                     case TaskType.GetSchools:
                     {
@@ -135,23 +151,39 @@ public class WorkerSubServices : WorkerBase
                     }
                     case TaskType.GetSchoolFromId:
                     {
-                        /*TaskData schoolId = taskData.TaskData;
-                        Console.WriteLine("Getting school from id!");
-                        await getSchoolById(taskId,int.Parse(schoolId.Value));*/
+                        Console.WriteLine("Getting School by ID");
+                        await getSchoolById(taskId, taskData.SchoolId);
                         break;
                     }
                     case TaskType.GetSchoolByName:
-                        /*TaskData schoolName = taskData.TaskData;*/
+                    {
+                        await getSchoolByName(taskId, taskData.SchoolName);
                         break;
+                    }
+                    case TaskType.GetSchoolByDistrict:
+                    {
+                        await getSchoolByDistrict(taskId, taskData.DistrictId);
+                        break;
+                    }
+
                     case TaskType.AddNewSchool:
+                    {
                         await addNewSchool(taskId, taskData.SchoolData);
                         break;
+                    }
+
                     case TaskType.DeleteSchool:
+                    {
                         await deleteSchool(taskId, taskData.SchoolId);
                         break;
+                    }
+
                     case TaskType.UpdateSchool:
+                    {
                         await UpdateSchool(taskId, taskData.SchoolId, taskData.SchoolUpdateData);
                         break;
+                    }
+                        
                 }
 
                

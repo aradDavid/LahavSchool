@@ -40,7 +40,7 @@ public class Validations
     public List<ValidationDisplay>? CheckNewSchool(SchoolDto currSchool)
     {
         resetValidationDisplay();
-        List<ValidationDisplay> validations = new List<ValidationDisplay>();
+        var validations = new List<ValidationDisplay>();
         ValidationDisplay validationDisplay = CheckNumericFieldValidations(currSchool.DistrictId, nameof(currSchool.DistrictId));
         if (!validationDisplay.IsValid)
         {
@@ -58,7 +58,7 @@ public class Validations
     public List<ValidationDisplay> CheckUpdatedSchool(SchoolUpdateDto currSchool,int schoolId)
     {
         resetValidationDisplay();
-        List<ValidationDisplay> validations = new List<ValidationDisplay>();
+        var validations = new List<ValidationDisplay>();
         ValidationDisplay validDisplay = CheckNumericFieldValidations(schoolId, "Id");
         if (validDisplay.IsValid)
         {
