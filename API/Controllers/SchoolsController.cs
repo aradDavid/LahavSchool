@@ -18,14 +18,14 @@ public class SchoolsController : ControllerBase
 {
     private readonly myDbContext _dbContext;
     private  Validations _schoolValidations;
-    private readonly WorkerService _schoolService;
+    private readonly SchoolWorkerService _schoolService;
    
     
     public SchoolsController(myDbContext dbContext) 
     {
         _dbContext = dbContext;
         _schoolValidations = new Validations();
-        _schoolService = new WorkerService();
+        _schoolService = new SchoolWorkerService();
     }
 
     private async Task<List<School>> getAllSchools(CancellationToken cancellationToken=default)
@@ -48,46 +48,34 @@ public class SchoolsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<School>> GetSchoolFromId(int id,CancellationToken cancellationToken=default)
     {
-        List<School> schools =await getAllSchools(cancellationToken);
-        School? currSchool = null;
-        foreach (School school in schools)
+        ActionResult<School> finalResult = BadRequest("There is no school with this id!");
+        List<School> schools = new List<School>();
+        ValidationDisplay validationDisplay = _schoolValidations.CheckNumericFieldValidations(id,"Id");
+        
+        if (validationDisplay.IsValid)
         {
-            if (school.Id == id)
+            schools =await getAllSchools(cancellationToken);
+            foreach (School school in schools)
             {
-                currSchool = school;
-                break;
+                if (school.Id == id)
+                {
+                    finalResult = Ok(school);
+                    break;
+                }
             }
         }
-        return currSchool != null ? Ok(currSchool) : NotFound("There is no school found!");
-        
-        /* string taskId = Guid.NewGuid().ToString();
-         TaskData taskData = new TaskData()
-         {
-             FiledName = "Id",
-             Value = id.ToString()
-         };
-         await _schoolService.InsertTaskIntoQueue(taskId, TaskType.GetSchoolFromId,taskData);
-         var result = await _schoolService.GetTaskOneResult<School>(taskId,cancellationToken);
-         return result != null ? Ok(result) : NotFound("There is no school found!");
-         */
+        else
+        {
+            finalResult = BadRequest(validationDisplay.ErrorMessage);
+        }
+
+        return finalResult;
+
     }
 
     [HttpGet("name/{schoolName}")]
     public async Task<ActionResult<School>> GetSchoolFromName(string schoolName,CancellationToken cancellationToken=default)
     {
-        
-        /*
-        string taskId = Guid.NewGuid().ToString();
-        TaskData taskData = new TaskData()
-        {
-            FiledName = "Name",
-            Value =schoolName
-        };
-        await _schoolService.InsertTaskIntoQueue(taskId, TaskType.GetSchoolByName, taskData);
-        var result = await _schoolService.GetTaskOneResult<School>(taskId,cancellationToken);
-        return result != null ? Ok(result) : NotFound("There is no school found!");
-        
-        */
         List<School> schools =await getAllSchools(cancellationToken);
         School? currSchool = null;
         foreach (School school in schools)
@@ -104,69 +92,116 @@ public class SchoolsController : ControllerBase
     [HttpGet("district/{districtId}")]
     public async Task<ActionResult<List<School>>> GetSchoolsFromDistrict(int districtId,CancellationToken cancellationToken=default)
     {
-        
-        var schools = await getAllSchools();
+        ActionResult<List<School>> finalResult = NotFound("There is no schools with this district!");
         List<School> allSchoolsFromDistrict = new List<School>();
-        foreach (var school in schools)
+        ValidationDisplay validationDisplay = _schoolValidations.CheckNumericFieldValidations(districtId, "DistrictId");
+        if (validationDisplay.IsValid)
         {
-            if (school.DistrictId == districtId)
+            var schools = await getAllSchools(cancellationToken);
+            foreach (var school in schools)
             {
-                ValidationDisplay validationTest = _schoolValidations.CheckIdValidations(school);
-                if (validationTest.IsValid)
+                if (school.DistrictId == districtId)
                 {
                     allSchoolsFromDistrict.Add(school);
                 }
-               
             }
         }
-        return allSchoolsFromDistrict.Count > 0 ? Ok(allSchoolsFromDistrict) : BadRequest("There are no schools in this district!");
+        else
+        {
+            finalResult = BadRequest(validationDisplay.ErrorMessage);
+        }
+
+        if (allSchoolsFromDistrict.Count > 0)
+        {
+            finalResult = Ok(allSchoolsFromDistrict);
+        }
+        return finalResult;
     }
 
     [HttpPost("addSchool")]
     public async Task<ActionResult<string>> AddSchool([FromQuery]SchoolDto schoolDto,CancellationToken cancellationToken=default)
     {
-        bool hasDone = false;
-        School newSchool = new School()
+        ActionResult<string> finalReslt = BadRequest("There was an error inserting the school!");
+        List<ValidationDisplay>? validationDisplays = _schoolValidations.CheckNewSchool(schoolDto);
+        if (validationDisplays == null)
         {
-            Name = schoolDto.Name,
-            DistrictId = schoolDto.DistrictId,
-            LicenseId = schoolDto.LicenseId,
-            CreatedAt = DateTime.Now.ToString(),
-        };
-        PropertyInfo[] props = newSchool.GetType().GetProperties();
-        foreach (var type  in props )
-        {
-            Console.WriteLine(type.GetValue(newSchool));
-        }
+            
+            School newSchool = new School()
+            {
+                Name = schoolDto.Name,
+                DistrictId = schoolDto.DistrictId,
+                LicenseId = schoolDto.LicenseId,
+                CreatedAt = DateTime.Now.ToString(),
+            };
             string taskId = Guid.NewGuid().ToString();
             await _schoolService.InsertTaskIntoQueue(taskId, TaskType.AddNewSchool,newSchool);
-            hasDone = await _schoolService.CheckIfTaskHasCompleted(taskId);
-        
-        return hasDone ? Ok($"{newSchool.Name} has been inserted!!") : BadRequest("There was an error!");
-        
+            if(await _schoolService.CheckIfTaskHasCompleted(taskId))
+            {
+                finalReslt = Ok($"{newSchool.Name} was inserted successfully!");
+            }
+        }
+        else
+        {
+            finalReslt = BadRequest(validationDisplays); 
+        }
+
+
+        return finalReslt;
+
     }
     
     [HttpGet("deleteSchool/{schoolId}")]
     public async Task<ActionResult<string>> DeleteSchool(int schoolId,CancellationToken cancellationToken=default)
     {
-        bool hasDone = false;
-        string taskId = Guid.NewGuid().ToString();
-        await _schoolService.InsertTaskIntoQueue(taskId, TaskType.DeleteSchool,schoolId);
-        hasDone = await _schoolService.CheckIfTaskHasCompleted(taskId);
-        return hasDone ? Ok($"{schoolId} has been Deleted!!") : BadRequest("There was an error!");
+        ValidationDisplay validationDisplay = _schoolValidations.CheckNumericFieldValidations(schoolId, "Id");
+        ActionResult<string> finalResult = BadRequest("There was an error deleting the school!");
+        if (validationDisplay.IsValid)
+        {
+            bool hasDone = false;
+            string taskId = Guid.NewGuid().ToString();
+            await _schoolService.InsertTaskIntoQueue(taskId, TaskType.DeleteSchool,schoolId);
+            if (await _schoolService.CheckIfTaskHasCompleted(taskId))
+            {
+                finalResult = Ok($"{schoolId} was deleted successfully!");
+            }
+            
+        }
+        return finalResult;
+
     }
     
     
     [HttpPost("updateSchool/{schoolId}")]
-        public async Task<ActionResult<string>> UpdateSchool([FromQuery]SchoolUpdateDto schoolUpdateDto,int schoolId,CancellationToken cancellationToken=default)
-        {
-            
-            bool hasDone = false;
-            string taskId = Guid.NewGuid().ToString();
-            await _schoolService.InsertTaskIntoQueue(taskId, TaskType.UpdateSchool,schoolId,schoolUpdateDto);
-            hasDone = await _schoolService.CheckIfTaskHasCompleted(taskId);
-            return hasDone ? Ok($"{schoolId} has been Updated!!") : BadRequest("There was an error!");
-            
-        }
+    public async Task<ActionResult<List<ValidationDisplay>>> UpdateSchool([FromQuery]SchoolUpdateDto schoolUpdateDto,int schoolId,CancellationToken cancellationToken=default)
+    {
+            ActionResult<List<ValidationDisplay>> result = BadRequest("There was an error updating the school!");
+            List<ValidationDisplay> validations = _schoolValidations.CheckUpdatedSchool(schoolUpdateDto, schoolId);
+            if (validations.Count == 0)
+            {
+                var allSchools = await getAllSchools(cancellationToken);
+                foreach (var school in allSchools)
+                {
+                    if (school.Id == schoolId)
+                    {
+                        _schoolValidations.CheckEmptyFields(schoolUpdateDto,school);
+                    }
+                }
+                
+                string taskId = Guid.NewGuid().ToString();
+                await _schoolService.InsertTaskIntoQueue(taskId, TaskType.UpdateSchool,schoolId,schoolUpdateDto);
+                if (await _schoolService.CheckIfTaskHasCompleted(taskId))
+                {
+                    result = Ok($"{schoolId} was updated successfully!");
+                }
+               
+            }
+            else
+            {
+                result = BadRequest(validations);
+            }
+
+            return result;
+
+    }
         
 }

@@ -1,4 +1,3 @@
-
 using System.Reflection;
 using System.Text.Json;
 using API.DTOs;
@@ -9,7 +8,7 @@ using CommonClasses.Models;
 
 namespace API.Services;
 
-public class WorkerService : WorkerBase
+public class SchoolWorkerService : WorkerBase
 {
     public async Task<bool> CheckIfTaskHasCompleted(string taskId)
     {
