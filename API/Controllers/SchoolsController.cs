@@ -19,6 +19,7 @@ public class SchoolsController : ControllerBase
     private readonly myDbContext _dbContext;
     private  Validations _schoolValidations;
     private readonly SchoolWorkerService _schoolService;
+    private readonly ILogger<SchoolsController> _logger;
   
     
     public SchoolsController(myDbContext dbContext,ILogger<SchoolsController> logger) 
@@ -26,15 +27,15 @@ public class SchoolsController : ControllerBase
         _dbContext = dbContext;
         _schoolValidations = new Validations();
         _schoolService = new SchoolWorkerService();
+        _logger = logger;
        
     }
-    
     [HttpGet]
     public async Task<ActionResult<string>> GetSchools(CancellationToken cancellationToken=default)
     {
         string taskId = await _schoolService.InsertTaskIntoQueueAsync(TaskType.GetSchools);
         var results = await _schoolService.GetTaskResults(taskId,cancellationToken);
-        Console.WriteLine($"i'm here waiting with:{taskId}");
+        _logger.LogInformation($"API: Getting all Schools id: {taskId}");
         return results.Count > 0 ? Ok(results) : NotFound("There is no schools yet!");
         
     }
@@ -48,7 +49,9 @@ public class SchoolsController : ControllerBase
             return BadRequest("There is no school with this id!");
         }
         string taskId = await _schoolService.InsertTaskIntoQueueAsync(id,TaskType.GetSchoolFromId);
+        _logger.LogInformation($"API: Getting a Schools by id:{id} taskId:{taskId}");
         var result = await _schoolService.GetTaskResults(taskId,cancellationToken);
+        _logger.LogInformation($"API: Finished getting a School by id:{id}, taskId:{taskId}");
         return result.Count > 0 ? Ok(result) : NotFound("There is no school found!");
 
     }
@@ -57,7 +60,9 @@ public class SchoolsController : ControllerBase
     public async Task<ActionResult<School>> GetSchoolFromName(string schoolName,CancellationToken cancellationToken=default)
     {
         string taskId = await _schoolService.InsertTaskIntoQueueAsync(schoolName);
+        _logger.LogInformation($"API: Getting a Schools by name:{schoolName} taskId:{taskId}");
         var result = await _schoolService.GetTaskResults(taskId,cancellationToken);
+        _logger.LogInformation($"API: Finished getting  Schools by name , taskId:{taskId}");
         return result.Count > 0 ? Ok(result) : NotFound("There is no school found!");
     }
     
@@ -70,7 +75,9 @@ public class SchoolsController : ControllerBase
             return BadRequest(validationDisplay);
         }
         string taskId = await _schoolService.InsertTaskIntoQueueAsync(districtId, TaskType.GetSchoolByDistrict);
+        _logger.LogInformation($"API: Getting a Schools by District Id:{districtId} taskId:{taskId}");
         var result = await _schoolService.GetTaskResults(taskId,cancellationToken);
+        _logger.LogInformation($"API: Finished getting School by District Id:{districtId}, taskId:{taskId}");
         return result.Count > 0 ? Ok(result) : NotFound("There is no schools found in this district!");
         
 
@@ -87,7 +94,7 @@ public class SchoolsController : ControllerBase
             return BadRequest(validationDisplays);
         }
         
-        School newSchool = new School()
+        var newSchool = new School()
         {
                 Name = schoolDto.Name,
                 DistrictId = schoolDto.DistrictId,
@@ -95,7 +102,9 @@ public class SchoolsController : ControllerBase
                 CreatedAt = DateTime.Now.ToString(),
         };
         string taskId = await _schoolService.InsertTaskIntoQueueAsync(newSchool,TaskType.AddNewSchool);
+        _logger.LogInformation($"API: Adding new School , taskId:{taskId}");
         var result = await _schoolService.CheckIfTaskHasCompleted(taskId);
+        _logger.LogInformation($"API: Finished adding new School , taskId:{taskId}");
         return result ? Ok("School has been Added!") : BadRequest("There was an error adding school");
     }
     
@@ -109,11 +118,12 @@ public class SchoolsController : ControllerBase
         }
 
         string taskId = await _schoolService.InsertTaskIntoQueueAsync(schoolId, TaskType.DeleteSchool);
+        _logger.LogInformation($"API: Deleting a School by id:{schoolId} taskId:{taskId}");
         var result = await _schoolService.CheckIfTaskHasCompleted(taskId);
+        _logger.LogInformation($"API: Finished Deleting a School by id:{schoolId} taskId:{taskId}");
         return result ? Ok("this school has been deleted!") : BadRequest("This school doesnt exist");
         
     }
-    
     
     [HttpPost("updateSchool/{schoolId}")]
     public async Task<IActionResult> UpdateSchool([FromQuery]SchoolUpdateDto schoolUpdateDto,int schoolId,CancellationToken cancellationToken=default)
@@ -124,7 +134,9 @@ public class SchoolsController : ControllerBase
             return BadRequest(validations);
         }
         string taskId = await _schoolService.InsertTaskIntoQueueAsync(schoolId,schoolUpdateDto, TaskType.UpdateSchool);
+        _logger.LogInformation($"API: Updating a School by id:{schoolId} taskId:{taskId}");
         var result = await _schoolService.CheckIfTaskHasCompleted(taskId);
+        _logger.LogInformation($"API: Finished update a School by id:{schoolId} taskId:{taskId}");
         return result? Ok("School has been updated!") : BadRequest("This School doesnt exist");
         
     }

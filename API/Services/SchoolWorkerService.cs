@@ -10,6 +10,7 @@ namespace API.Services;
 
 public class SchoolWorkerService : WorkerBase
 {
+    
     public async Task<bool> CheckIfTaskHasCompleted(string taskId)
     {
         int tries = 5;
@@ -23,7 +24,11 @@ public class SchoolWorkerService : WorkerBase
         
         return taskResult != "Doesnt-Exist";
     }
-    
+
+    public SchoolWorkerService()
+    {
+      
+    }
     public async Task<string> InsertTaskIntoQueueAsync(int id,TaskType taskName)
     {
         string taskId = Guid.NewGuid().ToString();
@@ -106,10 +111,8 @@ public class SchoolWorkerService : WorkerBase
     {
         
         List<School> returnState = null;
-        if ( await CheckIfTaskHasCompleted("stauts" + taskId))
+        if (await CheckIfTaskHasCompleted("stauts" + taskId))
         {
-            Console.WriteLine("I'm here");
-            Console.WriteLine(taskId);
             var taskResult = await _db.StringGetAsync(taskId);
             Console.WriteLine(taskResult);
             if (!taskResult.IsNullOrEmpty)
