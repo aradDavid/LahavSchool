@@ -10,6 +10,7 @@ namespace API.Services;
 
 public class SchoolWorkerService : WorkerBase
 {
+    
     public async Task<bool> CheckIfTaskHasCompleted(string taskId)
     {
         int tries = 5;
@@ -18,46 +19,72 @@ public class SchoolWorkerService : WorkerBase
         {
              taskResult = await _db.StringGetAsync(taskId);
              tries--;
-             await Task.Delay(200);
+             await Task.Delay(400);
         }
-
-        return true;
+        
+        return taskResult != "Doesnt-Exist";
     }
-    /*
-    public async Task InsertTaskIntoQueue(string taskId,TaskType taskName,TaskData taskData)
+
+    public SchoolWorkerService()
     {
-        TaskRedis currTask = new TaskRedis()
-        {
-            TaskId = taskId,
-            TaskName = taskName,
-            TaskData = taskData
-        };
-        await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
-       
-    }*/
-     public async Task InsertTaskIntoQueue(string taskId,TaskType taskName,School taskData)
+      
+    }
+    public async Task<string> InsertTaskIntoQueueAsync(int id,TaskType taskName)
     {
-        TaskRedis currTask = new TaskRedis()
+        string taskId = Guid.NewGuid().ToString();
+        TaskRedis currTask = null;
+        switch (taskName)
         {
-            TaskId = taskId,
-            TaskName = taskName,
-        };
-        if (taskData != null)
-        {
-            currTask.SchoolData = taskData;
-            PropertyInfo[] props = currTask.SchoolData.GetType().GetProperties();
-            foreach (var type  in props )
-            {
-                Console.WriteLine(type.GetValue(currTask.SchoolData));
-            }
+            case TaskType.GetSchoolFromId:
+            case TaskType.DeleteSchool:
+                currTask = new TaskRedis()
+                {
+                    TaskId = taskId,
+                    TaskName = taskName,
+                    SchoolId = id
+                };
+                break;
+            case TaskType.GetSchoolByDistrict:
+                currTask = new TaskRedis()
+                {
+                    TaskId = taskId,
+                    TaskName = taskName,
+                    DistrictId = id
+                };
+                break;
         }
-        
-        await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
        
-    } 
-     
-    public async Task InsertTaskIntoQueue(string taskId,TaskType taskName)
+        await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
+        return taskId;
+    }
+    public async Task<string> InsertTaskIntoQueueAsync(string schoolName)
     {
+        string taskId = Guid.NewGuid().ToString();
+        TaskRedis currTask = new TaskRedis()
+        {
+            TaskId = taskId,
+            TaskName = TaskType.GetSchoolByName,
+            SchoolName = schoolName
+        };
+        await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
+        return taskId;
+    }
+    public async Task<string> InsertTaskIntoQueueAsync(School taskData,TaskType taskName)
+    {
+        string taskId = Guid.NewGuid().ToString();
+        TaskRedis currTask = new TaskRedis()
+        {
+            TaskId = taskId,
+            TaskName = taskName,
+            SchoolData = taskData
+        };
+        await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
+        return taskId;
+
+    } 
+    public async Task<string> InsertTaskIntoQueueAsync(TaskType taskName)
+    {
+        string taskId = Guid.NewGuid().ToString();
         TaskRedis currTask = new TaskRedis()
         {
             TaskId = taskId,
@@ -65,45 +92,27 @@ public class SchoolWorkerService : WorkerBase
         };
         
         await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
-       
+        return taskId;
     } 
-    
-    
-    public async Task InsertTaskIntoQueue(string taskId,TaskType taskName,int schoolId)
+    public async Task<string> InsertTaskIntoQueueAsync(int schoolId,SchoolUpdateDto schoolUpdate,TaskType taskName)
     {
-        TaskRedis currTask = new TaskRedis()
-        {
-            TaskId = taskId,
-            TaskName = taskName,
-            SchoolId = schoolId
-        };
-        
-        await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
-       
-    } 
-    
-    public async Task InsertTaskIntoQueue(string taskId,TaskType taskName,int schoolId,SchoolUpdateDto schoolUpdate)
-    {
+        string taskId = Guid.NewGuid().ToString();
         TaskRedis currTask = new TaskRedis()
         {
             TaskId = taskId,
             TaskName = taskName,
             SchoolId = schoolId,
             SchoolUpdateData = schoolUpdate
-        };
-        
+        }; 
         await _db.ListRightPushAsync("TasksQueue", JsonSerializer.Serialize(currTask));
-       
+        return taskId;
     } 
-
     public async Task<List<School>> GetTaskResults(string taskId, CancellationToken cancellationToken)
     {
         
         List<School> returnState = null;
-        if ( await CheckIfTaskHasCompleted("stauts" + taskId))
+        if (await CheckIfTaskHasCompleted("stauts" + taskId))
         {
-            Console.WriteLine("I'm here");
-            Console.WriteLine(taskId);
             var taskResult = await _db.StringGetAsync(taskId);
             Console.WriteLine(taskResult);
             if (!taskResult.IsNullOrEmpty)
@@ -115,7 +124,6 @@ public class SchoolWorkerService : WorkerBase
         
         return returnState;
     }
-    
     public async Task<T> GetTaskOneResult<T>(string taskId, CancellationToken cancellationToken)
     {
 

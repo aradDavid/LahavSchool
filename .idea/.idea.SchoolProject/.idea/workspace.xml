@@ -32,7 +32,11 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/782d190e1c444cbbabecde48248c9c9e3800/70/bf1397d9/MvcServiceCollectionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/892643f335d84a85a8597ebf4ae2bbb1cca00/1f/02db96d0/ControllerBase.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/892643f335d84a85a8597ebf4ae2bbb1cca00/24/46893a07/BadRequestResult.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/892643f335d84a85a8597ebf4ae2bbb1cca00/27/49a37cc6/ObjectMethodExecutorAwaitable.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/892643f335d84a85a8597ebf4ae2bbb1cca00/6d/4fe2c354/ActionMethodExecutor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/892643f335d84a85a8597ebf4ae2bbb1cca00/9e/45caab31/StatusCodeResult.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bc1d76b9965449cf84649bc8d6b5b9c5c63600/06/f9b752f8/AsyncValueTaskMethodBuilder`1.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bc1d76b9965449cf84649bc8d6b5b9c5c63600/72/6561d0b8/Int32.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bc1d76b9965449cf84649bc8d6b5b9c5c63600/d8/2bab87dc/String.cs" root0="FORCE_HIGHLIGHTING" />
@@ -85,7 +89,7 @@
     ]
   }
 }</component>
-  <component name="RunManager" selected=".NET Launch Settings Profile.API: http">
+  <component name="RunManager" selected=".NET Launch Settings Profile.ms_db: http">
     <configuration name="CommonClasses" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -179,7 +183,7 @@
       <workItem from="1734696718099" duration="390000" />
       <workItem from="1734697219120" duration="31000" />
       <workItem from="1734697485851" duration="5266000" />
-      <workItem from="1734852379290" duration="62437000" />
+      <workItem from="1734852379290" duration="85791000" />
     </task>
     <servers />
   </component>
@@ -195,17 +199,43 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/API/Controllers/SchoolsController.cs</url>
-          <line>126</line>
-          <properties documentPath="$PROJECT_DIR$/API/Controllers/SchoolsController.cs" containingFunctionPresentation="Method 'AddSchool'">
+          <url>file://$PROJECT_DIR$/API/Services/SchoolWorkerService.cs</url>
+          <line>80</line>
+          <properties documentPath="$PROJECT_DIR$/API/Services/SchoolWorkerService.cs" containingFunctionPresentation="Method 'InsertTaskIntoQueueAsync'">
             <startOffsets>
-              <option value="4500" />
+              <option value="2480" />
             </startOffsets>
             <endOffsets>
-              <option value="4501" />
+              <option value="2481" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="6" />
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/API/Services/SchoolWorkerService.cs</url>
+          <line>13</line>
+          <properties documentPath="$PROJECT_DIR$/API/Services/SchoolWorkerService.cs" containingFunctionPresentation="Method 'CheckIfTaskHasCompleted'">
+            <startOffsets>
+              <option value="318" />
+            </startOffsets>
+            <endOffsets>
+              <option value="319" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/ms_db/Services/WorkerSubServices.cs</url>
+          <line>77</line>
+          <properties documentPath="$PROJECT_DIR$/ms_db/Services/WorkerSubServices.cs" containingFunctionPresentation="Method 'deleteSchool'">
+            <startOffsets>
+              <option value="2964" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3001" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
