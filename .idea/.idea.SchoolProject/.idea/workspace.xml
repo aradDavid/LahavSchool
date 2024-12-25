@@ -6,25 +6,22 @@
     <projectFile>CommonClasses/CommonClasses.csproj</projectFile>
     <projectFile profileName="http">ms_db/ms_db.csproj</projectFile>
     <projectFile profileName="https">ms_db/ms_db.csproj</projectFile>
+    <projectFile profileName="http">ms_webhooks/ms_webhooks.csproj</projectFile>
+    <projectFile profileName="https">ms_webhooks/ms_webhooks.csproj</projectFile>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5ca74e35-2f5d-4fb7-9afa-341012c4fd0c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/API/DTOs/RequestDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/API/Services/WebhookService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CommonClasses/Models/WebhookReq.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ms_webhooks/Services/WebhooksWorker.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SchoolProject/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SchoolProject/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/API/Controllers/SchoolsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/API/Controllers/SchoolsController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/API/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/API/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/API/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CommonClasses/CommonClasses.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/CommonClasses/CommonClasses.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CommonClasses/Data/myDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ms_db/Data/myDbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SchoolProject.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/SchoolProject.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms_db/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ms_db/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SchoolProject.sln" beforeDir="false" afterPath="$PROJECT_DIR$/SchoolProject.sln" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ms_db/Services/WorkerSubServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ms_db/Services/WorkerSubServices.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms_db/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/ms_db/appsettings.Development.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms_db/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ms_db/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms_db/ms_db.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ms_db/ms_db.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ms_db/ms_db.http" beforeDir="false" afterPath="$PROJECT_DIR$/ms_db/ms_db.http" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,10 +84,10 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    ".NET Launch Settings Profile.API: http.executor": "Run",
-    ".NET Launch Settings Profile.ms_db: http.executor": "Run",
+    ".NET Launch Settings Profile.API: http.executor": "Debug",
+    ".NET Launch Settings Profile.ms_db: http.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feat/8084848195-Changing-Db-To-MySQL",
+    "git-widget-placeholder": "feat/8084891954-Adding-webhooks-ms",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -105,7 +102,7 @@
     ]
   }
 }]]></component>
-  <component name="RunManager" selected=".NET Launch Settings Profile.ms_db: http">
+  <component name="RunManager" selected=".NET Launch Settings Profile.API: http">
     <configuration name="CommonClasses" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -184,6 +181,36 @@
         <option name="Build" />
       </method>
     </configuration>
+    <configuration name="ms_webhooks: http" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/ms_webhooks/ms_webhooks.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value="net8.0" />
+      <option name="LAUNCH_PROFILE_NAME" value="http" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
+    <configuration name="ms_webhooks: https" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/ms_webhooks/ms_webhooks.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value="net8.0" />
+      <option name="LAUNCH_PROFILE_NAME" value="https" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -230,13 +257,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/ms_db/Services/WorkerSubServices.cs</url>
-          <line>77</line>
+          <line>78</line>
           <properties documentPath="$PROJECT_DIR$/ms_db/Services/WorkerSubServices.cs" containingFunctionPresentation="Method 'deleteSchool'">
             <startOffsets>
-              <option value="2956" />
+              <option value="3054" />
             </startOffsets>
             <endOffsets>
-              <option value="2993" />
+              <option value="3091" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="13" />

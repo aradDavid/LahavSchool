@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ms_db", "ms_db\ms_db.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonClasses", "CommonClasses\CommonClasses.csproj", "{6C8B5771-E0BA-4766-BEDE-368271A52B20}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ms_webhooks", "ms_webhooks\ms_webhooks.csproj", "{5DA3C925-056C-480D-BE83-BC627A2DC847}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{6C8B5771-E0BA-4766-BEDE-368271A52B20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C8B5771-E0BA-4766-BEDE-368271A52B20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C8B5771-E0BA-4766-BEDE-368271A52B20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DA3C925-056C-480D-BE83-BC627A2DC847}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DA3C925-056C-480D-BE83-BC627A2DC847}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DA3C925-056C-480D-BE83-BC627A2DC847}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DA3C925-056C-480D-BE83-BC627A2DC847}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
