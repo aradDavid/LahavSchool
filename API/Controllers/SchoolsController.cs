@@ -1,13 +1,8 @@
 
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using CommonClasses.Models;
-using CommonClasses.Data;
 using API.DTOs;
 using API.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
-using CommonClasses;
 using CommonClasses.Enums;
 
 namespace API.Controllers;
@@ -16,15 +11,13 @@ namespace API.Controllers;
 [Route("/[controller]")]
 public class SchoolsController : ControllerBase
 {
-    private readonly myDbContext _dbContext;
     private  Validations _schoolValidations;
     private readonly SchoolWorkerService _schoolService;
     private readonly ILogger<SchoolsController> _logger;
   
     
-    public SchoolsController(myDbContext dbContext,ILogger<SchoolsController> logger) 
+    public SchoolsController(ILogger<SchoolsController> logger) 
     {
-        _dbContext = dbContext;
         _schoolValidations = new Validations();
         _schoolService = new SchoolWorkerService();
         _logger = logger;
