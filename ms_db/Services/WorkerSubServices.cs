@@ -13,19 +13,20 @@ public class WorkerSubServices : WorkerBase
 {
     private readonly myDbContext _dbContext;
     private readonly Validations _validations;
+    private readonly ILogger<WorkerSubServices> _logger;
 
-    public WorkerSubServices(myDbContext dbContext)
+    public WorkerSubServices(myDbContext dbContext,ILogger<WorkerSubServices> logger)
     {
         _dbContext = dbContext;
         _validations = new Validations();
+        _logger = logger;
     }
 
     private async Task getSchools(string taskId)
     {
         var allSchools = from s in _dbContext.Schools where s.ExpiresAt == null select s;
         var allSchoolsAsJson = JsonSerializer.Serialize(allSchools);
-        Console.WriteLine($"Pushing the result with id:{taskId}");
-        Console.WriteLine(allSchoolsAsJson);
+        _logger.LogInformation($"Pushing the result with id:{taskId}");
         await _db.StringSetAsync(taskId, allSchoolsAsJson);
         string statusKey = "status" + taskId;
         await _db.StringSetAsync(statusKey, "Done");
@@ -38,7 +39,7 @@ public class WorkerSubServices : WorkerBase
             select s;
         var currSchool = await _dbContext.Schools.FindAsync(schoolId);
         var currSchoolAsJson = JsonSerializer.Serialize(currSchoolTest);
-        Console.WriteLine("Found it :"+currSchoolAsJson);
+        _logger.LogInformation($"Found it :{currSchoolAsJson}");
         await _db.StringSetAsync(taskId, currSchoolAsJson);
         string statusKey = "status" + taskId;
         await _db.StringSetAsync(statusKey, "Done");
@@ -50,7 +51,7 @@ public class WorkerSubServices : WorkerBase
             where s.Name == schoolName && s.ExpiresAt == null 
             select s;
         var currSchoolAsJson = JsonSerializer.Serialize(schoolNameQuery);
-        Console.WriteLine("Found it :"+currSchoolAsJson);
+        _logger.LogInformation($"Found it :{currSchoolAsJson}");
         await _db.StringSetAsync(taskId, currSchoolAsJson);
         string statusKey = "status" + taskId;
         await _db.StringSetAsync(statusKey, "Done");
@@ -61,7 +62,7 @@ public class WorkerSubServices : WorkerBase
             where s.DistrictId == districtId && s.ExpiresAt== null
             select s;
         var currSchoolsAsJson = JsonSerializer.Serialize(districtQuery);
-        Console.WriteLine("Found it :"+currSchoolsAsJson);
+        _logger.LogInformation($"Found it :{currSchoolsAsJson}");
         await _db.StringSetAsync(taskId, currSchoolsAsJson);
         string statusKey = "status" + taskId;
         await _db.StringSetAsync(statusKey, "Done");
@@ -81,6 +82,7 @@ public class WorkerSubServices : WorkerBase
         {
             deletedSchool.ExpiresAt = DateTime.Now.ToString();
             await _dbContext.SaveChangesAsync();
+            _logger.LogInformation($"Has been  deleted :{deletedSchool}");
             await _db.StringSetAsync(statusKey, "Done");
         }
         else
